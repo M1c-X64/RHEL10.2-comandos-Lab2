@@ -1,0 +1,91 @@
+COMANDOS DEL LABORATORIO - RHEL 10 (VMware)
+
+======================================================================
+PRACTICA 1
+======================================================================
+
+# 1. Actualizar sistema y listar repositorios
+sudo dnf update -y
+sudo dnf upgrade -y
+dnf repolist
+sudo subscription-manager repos --list-enabled
+
+# 2. Buscar la herramienta en el cache de repositorios
+dnf search bashtop
+dnf info bashtop
+
+# 3. Instalar Bashtop manualmente con git
+sudo dnf install -y git make
+git clone https://github.com/aristocratos/bashtop.git
+cd bashtop
+sudo make install
+which bashtop
+bashtop
+
+# 4. Desinstalar y eliminar archivos de configuracion
+cd ~/bashtop
+sudo make uninstall
+rm -rf ~/.config/bashtop
+which bashtop
+
+# 5. Eliminar dependencias que ya no se usan
+sudo dnf autoremove -y
+sudo dnf remove -y git make
+
+
+======================================================================
+PRACTICA 2
+======================================================================
+
+# 1. Cron: actualizar el sistema todos los dias a las 11 p.m.
+sudo crontab -e
+# Agregar esta linea:
+0 23 * * * /usr/bin/dnf -y update
+
+# 2. Cron: reiniciar los domingos a las 3 a.m.
+# Agregar esta linea en el mismo crontab:
+0 3 * * 0 /usr/sbin/shutdown -r now
+
+# Verificar los trabajos cron
+sudo crontab -l
+
+# 3. Tarea con "at": borrar /tmp dentro de 1 minuto
+sudo dnf install -y at
+sudo systemctl enable --now atd
+touch /tmp/prueba1.txt /tmp/prueba2.txt
+ls /tmp
+echo "rm -rf /tmp/*" | sudo at now + 1 minute
+atq
+# Esperar 1 minuto
+ls /tmp
+
+
+======================================================================
+PRACTICA 3
+======================================================================
+
+# 1. Crear el disco de 20 GB en VMware (con la VM apagada):
+#    VM > Settings > Add > Hard Disk > 20 GB
+
+# 2. Reiniciar, particionar, formatear y montar
+sudo reboot
+lsblk
+sudo fdisk /dev/sdb
+# Dentro de fdisk: n, p, Enter (valores por defecto), w
+sudo mkfs.ext4 /dev/sdb1
+mkdir ~/Desktop/disco
+sudo mount /dev/sdb1 ~/Desktop/disco
+
+# 3. Crear el archivo dentro del directorio
+cd ~/Desktop/disco
+sudo touch AdrianAlcantara.txt
+ls
+
+# 4. Desmontar y montar en /mnt
+cd ~
+sudo umount ~/Desktop/disco
+sudo mount /dev/sdb1 /mnt
+
+# 5. Comprobar que el archivo sigue ahi
+cd /mnt
+ls
